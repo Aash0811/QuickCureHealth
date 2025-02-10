@@ -1,2 +1,3 @@
 # QuickCureHealth
-hello my friends
+hello my friend
+bull shit guys
