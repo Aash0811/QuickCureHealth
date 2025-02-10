@@ -1,1 +1,2 @@
 # QuickCureHealth
+hello my friends
