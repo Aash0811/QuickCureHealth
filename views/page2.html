@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test booking</title>
+  <link rel="stylesheet" href="page2.css">
+  <link rel="icon" href="logoo.jpg">
+</head>
+<body>
+  <header>
+    <div class="logo">QuickCureHealth</div>
+    <button class="signin" id="back">back</button>
+  </header>
+
+  <main>
+    <input type="text" id="testSearch" placeholder="Search for a medical test..." oninput="searchTests()" />
+    <div id="results" class="results-container"></div>
+  </main>
+
+  <div id="testModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="selectedTestTitle"></h2>
+      <p id="price"></p>
+      <form id="appointmentForm">
+        <input type="text" placeholder="Full Name" required>
+        <input type="email" placeholder="Email" required>
+        <input type="tel" placeholder="Phone Number" required>
+        <input type="number" placeholder="Age" required>
+        <input type="date" required>
+        <input type="time" required>
+        <button type="submit">Proceed to Payment</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="page2.js"></script>
+</body>
+</html>

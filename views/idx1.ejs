@@ -1,0 +1,45 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickCureHealth-Symptome prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/idx1.css">
+</head>
+<body>
+    <div class="navigation">
+        <div class="applogo">
+            <h3><b>QuickCureHealth</b></h3>
+        </div>
+        <div class="signinbutton">
+            <button  class="signin" id="back">back</button>
+        </div>
+    </div>
+    <div id="container">
+        <div class="box">
+            <h2>Enter Your Details and Health Problems</h2>
+            <form id="healthForm">
+                <div class="flex-container">
+                    <select class="name" name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="not-specified">Not Specified</option>
+                    </select>
+                    <input type="number" placeholder="Age" class="nam" name="age" required min="1" max="100">
+                </div>
+                <input type="text" name="Occupation" placeholder="Occupation" class="name" required>
+                <textarea name="symptoms" placeholder="Enter your health problems" class="name" id="symptom" required></textarea>
+                <button type="button" id="checkSymptomsBtn" class="submit-btn">Check Symptoms</button>
+            </form>
+        </div>
+        <div class="box" id="outputBox">
+            <h2>Possible Conditions</h2>
+            <div id="output">
+                <p id="out"></p>
+            </div>
+        </div>
+    </div>
+    <script src="idx1.js"></script>
+</body>
+</html>

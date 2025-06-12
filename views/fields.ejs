@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickCureHealth - Specialists</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=location_on" />
+  <link rel="stylesheet" href="/fields.css">
+</head>
+<body>
+  <div class="navigation">
+    <div class="applogo">
+      <h3><b>QuickCureHealth</b></h3>
+    </div>
+    <div class="signinbutton">
+      <a href="/"><button type="submit" class="signin">Back</button></a>
+    </div>
+  </div>
+  <div class="second">
+     <div id="citySelect"><i class="fa-solid fa-location-dot"> <%=city%> </i>  </div>
+     <form method="post" action="/list/<%=city%>/sort">
+    <div class="doctors">
+        <div class="searchbar">
+          <input type="text" id="select" name="doctor" 
+          <%if(spec){%>
+            value=<%=spec%>
+          <%}%>
+          list="selects"  placeholder="Search for specialist....." >
+          <datalist id="selects">
+            <option value="Cardiologist"></option>
+            <option value="Dermatologist"></option>
+            <option value="Neurologist"></option>
+            <option value="Pediatrician"></option>
+            <option value="Psychiatrist"></option>
+            <option value="Orthopedic"></option>
+            <option value="Gynecologist"></option>
+            <option value="Ophthalmologist"></option>
+            <option value="ENT Specialist"></option>
+            <option value="Dentist"></option>
+            <option value="General Physician"></option>
+          </datalist>
+          <button  class="search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        &nbsp;
+        <label class="sort" for="sort">sort:</label>
+          <select name="sort" id="sort">
+            <option value="name ASC">A-Z </option>
+            <option value="name DESC">Z-A</option>
+            <option value="rating DESC">Rating</option>
+            <option value="work_experience DESC"> Work Experience</option>
+          </select>
+        </div>
+  </div>
+</form>
+  </div>
+<br>
+<br>
+  <div id="main">
+    <% for (let i = 0; i < data.length; i++) { %>
+      <div id="info">
+        <h3>Name: <%= data[i].name %></h3>
+        <br>
+        <p>
+          <b>Specialization:</b> <%= data[i].specialization %><br>
+         <b>City:</b>  <%= data[i].city %><br>
+          <b>Rating:</b> <%= data[i].rating %><br>
+          <b>Hospital Name:</b> <%= data[i].hospitalName %><br>
+          <b>Study:</b> <%= data[i].study %><br>
+          <b>Work Experience:</b> <%= data[i].work_experience %> years
+        </p>
+        <hr>
+        <div>
+          <button type="submit" class="appoint">Appointment</button>
+          <button  class="appoint">Video Call</button>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>
+
+
