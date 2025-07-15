@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patient Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .dashboard-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .chat-request {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .doctor-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 20px;
+    }
+    .chat-info {
+      flex: 1;
+    }
+    .chat-info h5 {
+      margin: 0;
+    }
+    .chat-info small {
+      color: #6c757d;
+    }
+    .status-badge {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .btn-chat {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <% if (error && error.length > 0) { %>
+  <div class="alert alert-danger text-center"><%= error %></div>
+<% } %>
+
+
+  <div class="dashboard-container">
+    <h2 class="mb-4 text-center">🧑‍⚕️ Patient Dashboard</h2>
+
+    <% if (chatRequests.length === 0) { %>
+      <div class="alert alert-info text-center">No chat requests yet.</div>
+    <% } %>
+
+    <% chatRequests.forEach(function(request) { %>
+      <div class="chat-request">
+        <img src="hello.png" alt="Doctor" class="doctor-img">
+        <div class="chat-info">
+          <% if (request.doctor) { %>
+            <h5><%= request.doctor.name %></h5>
+            <small>Specialization: <%= request.doctor.specialization %></small><br>
+          <% } else { %>
+            <h5>Doctor not found</h5>
+            <small>Specialization: N/A</small><br>
+          <% } %>
+          <small>Requested on: <%= request.createdAt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }) %></small><br>
+
+          <% if (request.status === 'pending') { %>
+            <span class="badge badge-warning status-badge">⏳ Waiting for doctor</span>
+          <% } else if (request.status === 'accepted') { %>
+            <span class="badge badge-success status-badge">✅ Accepted</span>
+          <% } else { %>
+            <span class="badge badge-secondary status-badge">❌ Unknown</span>
+          <% } %>
+        </div>
+
+        <% if (request.status === 'accepted') { %>
+          <a href="/chat/<%= request._id %>" class="btn btn-primary btn-sm ml-3 btn-chat">💬 Join Chat</a>
+        <% } %>
+      </div>
+    <% }); %>
+
+  </div>
+
+</body>
+
+</html>

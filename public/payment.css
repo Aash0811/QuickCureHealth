@@ -69,3 +69,57 @@ body {
     font-size: 1rem;
   }
   
+.payment-container {
+  background: #fff;
+  max-width: 400px;
+  margin: 5% auto;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px #1f838422;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.payment-container h2 {
+  color: #1f8384;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.payment-container label {
+  font-weight: 600;
+  color: #1f8384;
+  margin-bottom: 0.2rem;
+  margin-top: 0.7rem;
+}
+.payment-container input[type="text"],
+.payment-container input[type="password"] {
+  padding: 0.7rem;
+  border: 1.5px solid #1f8384;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  background: #f7f7f7;
+  font-size: 1rem;
+  transition: box-shadow 0.2s;
+}
+.payment-container input:focus {
+  box-shadow: 0 0 0 2px #1f838433;
+  border-color: #1f8384;
+}
+.payment-container button[type="submit"] {
+  background: #1f8384;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0.9rem;
+  margin-top: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #1f838422;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.payment-container button[type="submit"]:hover {
+  background: #17696a;
+  box-shadow: 0 4px 16px #1f838444;
+}
+  

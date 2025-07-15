@@ -3,35 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Payment Gateway</title>
+  <title>Stripe Payment</title>
   <link rel="stylesheet" href="payment.css">
-  <link rel="icon" href="logoo.jpg">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body { background: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; }
+    .stripe-container { max-width: 420px; margin: 3rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #1f838422; padding: 2.5rem 2.5rem 1.5rem 2.5rem; }
+    .stripe-header { color: #1f8384; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.2rem; text-align: center; }
+    .stripe-label { font-weight: 600; color: #1f8384; margin-bottom: 0.2rem; margin-top: 0.7rem; display: block; }
+    .stripe-input, .StripeElement { width: 100%; padding: 0.7rem; border: 1.5px solid #1f8384; border-radius: 6px; margin-bottom: 1rem; background: #f7f7f7; font-size: 1rem; transition: box-shadow 0.2s; }
+    .stripe-input:focus, .StripeElement--focus { box-shadow: 0 0 0 2px #1f838433; border-color: #1f8384; }
+    .stripe-row { display: flex; gap: 0.5rem; }
+    .stripe-btn { background: #1f8384; color: #fff; font-size: 1.1rem; font-weight: 600; border: none; border-radius: 6px; padding: 0.9rem; margin-top: 0.5rem; cursor: pointer; box-shadow: 0 2px 8px #1f838422; transition: background 0.2s, box-shadow 0.2s; width: 100%; }
+    .stripe-btn:hover { background: #17696a; box-shadow: 0 4px 16px #1f838444; }
+    .stripe-success { text-align: center; color: #1f8384; font-size: 1.3rem; margin-top: 2rem; }
+    .home-btn { background: #1f8384; color: #fff; font-size: 1.1rem; font-weight: 600; border: none; border-radius: 6px; padding: 0.9rem 2rem; margin-top: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px #1f838422; transition: background 0.2s, box-shadow 0.2s; }
+    .home-btn:hover { background: #17696a; box-shadow: 0 4px 16px #1f838444; }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="logo">QuickCureHealth</div>
-    <button class="back-btn" onclick="window.history.back()">Back</button>
-  </header>
-
-  <main>
-    <h2>Payment Details</h2>
-    <form id="paymentForm">
-      <label for="cardNumber">Card Number</label>
-      <input type="text" id="cardNumber" placeholder="Enter Card Number" required>
-
-      <label for="expiryDate">Expiry Date</label>
-      <input type="month" id="expiryDate" required>
-
-      <label for="cvv">CVV</label>
-      <input type="text" id="cvv" placeholder="Enter CVV" required>
-
-      <label for="amount">Amount</label>
-      <input type="text" id="amount" value="₹500" disabled>
-
-      <button type="submit">Pay Now</button>
+  <div class="stripe-container">
+    <div class="stripe-header">PAYMENT OVERVIEW</div>
+    <form id="payment-form">
+      <div class="stripe-row">
+        <div style="flex:1;">
+          <label class="stripe-label">First name</label>
+          <input class="stripe-input" id="firstName" required placeholder="John" />
+        </div>
+        <div style="flex:1;">
+          <label class="stripe-label">Last name</label>
+          <input class="stripe-input" id="lastName" required placeholder="Doe" />
+        </div>
+      </div>
+      <label class="stripe-label">E-mail</label>
+      <input class="stripe-input" id="email" type="email" required placeholder="john@example.com" />
+      <label class="stripe-label">Card details</label>
+      <div id="card-element" class="stripe-input"></div>
+      <button class="stripe-btn" id="submit">Submit</button>
+      <div id="card-errors" role="alert" style="color:#d9534f;margin-top:0.5rem;"></div>
     </form>
-  </main>
-
-  <script src="payment.js"></script>
+    <div id="success-message" class="stripe-success" style="display:none;">
+      <div style="font-size:2.5rem;">✔️</div>
+      Payment successful!<br/>
+      <button class="home-btn" onclick="window.location.href='/'">Go Home</button>
+    </div>
+  </div>
+  <script>
+    const stripe = Stripe('pk_test_51RieprPmDOSyG7nqvs4ZciDryULvuLSEXv8emBJpcKOUxgcmC5T0HTQCtb7Js1VqFMG9sx9d0F9WJtIS3TH4LiHr00DeBBTvqE');
+    const elements = stripe.elements();
+    const card = elements.create('card', { style: { base: { fontSize: '16px', color: '#1f8384', '::placeholder': { color: '#bfbfbf' } } } });
+    card.mount('#card-element');
+    const form = document.getElementById('payment-form');
+    const errorDiv = document.getElementById('card-errors');
+    function getBookingId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('bookingId');
+    }
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      errorDiv.textContent = '';
+      const { token, error } = await stripe.createToken(card, {
+        name: document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value,
+        email: document.getElementById('email').value
+      });
+      if (error) {
+        errorDiv.textContent = error.message;
+      } else {
+        const bookingId = getBookingId();
+        if (!bookingId) {
+          errorDiv.textContent = "Booking ID missing!";
+          return;
+        }
+        const response = await fetch('/dummy-pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookingId })
+        });
+        if (response.ok) {
+          form.style.display = 'none';
+          document.getElementById('success-message').style.display = 'block';
+        } else {
+          errorDiv.textContent = "Payment succeeded but booking confirmation failed.";
+        }
+      }
+    });
+  </script>
 </body>
 </html>

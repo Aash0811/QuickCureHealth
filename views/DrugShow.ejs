@@ -1,0 +1,52 @@
+<%layout("./boilerplate/nav.ejs")%>
+<link href="/DrugShow.css" rel="stylesheet"> 
+<body>
+
+ 
+ 
+ <div class="main">
+    <div><img id="main-img" src="<%=data.image%>" alt="tablet img" height="500px"
+    width="500px" ></div>
+    <div> 
+        <br>
+        <h1 id="name"><%=data.name %></h1>
+        <h2>company :<%=data.company%></h2>
+        <p><b>quantity:</b><%=data.quantity[0]%></p>
+        <h4> price:<%=data.medSelling%></h4>
+        <p><b>price per quantity:</b><%=data.perMedCosting%></p>
+      <form action="/drug/<%=data._id%>"  method="post"> <% if(data.stock>0){%><button type="submit" class="cart" >  &nbsp; &nbsp;Add to cart  &nbsp;&nbsp;</button><%} else{%><h3><b style="color:red">out of Stock</b></h3><%}%></form> 
+       <p></p>
+       <p>*MRP inclusive of all taxes</p>
+       <p><b>payment:</b> cash on delivery(COD)</p>
+       <br>
+<%if(data.stock>0){%> <p> only <b><%=data.stock%></b> left Hurry up!</p>  <%}%>
+    
+         </div> </div>
+         <div class="desc">
+             <%if(data.content){%>
+             <h4>Description</h4>
+            <ul>
+                <%for(let i=0;i< data.content.length;i++){%>
+                    <li><%=data.content[i]%></li>
+                <%}%>
+                </ul>
+            <%}%>
+            <%if(data.side_effects){%>
+                <h4>side Effects</h4>
+                <% for(let eff of data.side_effects) {%>
+                <li><%=eff%></li>
+                <% } %>
+                <%}%>
+         </div>
+       
+  
+    
+
+</body>
+<!-- <%layout("./boilerplate/cart.ejs")%> -->
+<script>
+    document.querySelector("onClick",()=>{
+        window.location.href="/drug/<%=data._id%>";
+    })
+
+</script>

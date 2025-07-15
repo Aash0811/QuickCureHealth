@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QuickCureHealth - Specialists</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=location_on" />
-  <link rel="stylesheet" href="/fields.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="icon" href="logoo.jpg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/fields.css" />
 </head>
 <body>
   <div class="navigation">
@@ -17,69 +18,109 @@
       <h3><b>QuickCureHealth</b></h3>
     </div>
     <div class="signinbutton">
-      <a href="/"><button type="submit" class="signin">Back</button></a>
+      <button class="signin" id="back">Back</button>
     </div>
   </div>
+
   <div class="second">
-     <div id="citySelect"><i class="fa-solid fa-location-dot"> <%=city%> </i>  </div>
-     <form method="post" action="/list/<%=city%>/sort">
-    <div class="doctors">
+    <div id="citySelect"><i class="fa-solid fa-location-dot"></i>&nbsp;<%= city %></div>
+
+    <form method="POST" action="/list/<%= city %>/sort">
+      <div class="doctors">
         <div class="searchbar">
-          <input type="text" id="select" name="doctor" 
-          <%if(spec){%>
-            value=<%=spec%>
-          <%}%>
-          list="selects"  placeholder="Search for specialist....." >
+          <input type="text" id="select" name="doctor"
+            <% if (spec) { %> value="<%= spec %>" <% } %>
+            list="selects" placeholder="Search for specialist..." />
           <datalist id="selects">
-            <option value="Cardiologist"></option>
-            <option value="Dermatologist"></option>
-            <option value="Neurologist"></option>
-            <option value="Pediatrician"></option>
-            <option value="Psychiatrist"></option>
-            <option value="Orthopedic"></option>
-            <option value="Gynecologist"></option>
-            <option value="Ophthalmologist"></option>
-            <option value="ENT Specialist"></option>
-            <option value="Dentist"></option>
-            <option value="General Physician"></option>
+            <option value="Cardiologist" />
+            <option value="Dermatologist" />
+            <option value="Neurologist" />
+            <option value="Pediatrician" />
+            <option value="Psychiatrist" />
+            <option value="Orthopedic" />
+            <option value="Gynecologist" />
+            <option value="Ophthalmologist" />
+            <option value="ENT Specialist" />
+            <option value="Dentist" />
+            <option value="General Physician" />
           </datalist>
-          <button  class="search"><i class="fa-solid fa-magnifying-glass"></i></button>
-        &nbsp;
-        <label class="sort" for="sort">sort:</label>
+
+          <button class="search" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+          &nbsp;&nbsp;
+          <label class="sort" for="sort">Sort:</label>
           <select name="sort" id="sort">
-            <option value="name ASC">A-Z </option>
-            <option value="name DESC">Z-A</option>
-            <option value="rating DESC">Rating</option>
-            <option value="work_experience DESC"> Work Experience</option>
+            <option value="name ASC">A-Z</option>
+            <option value="rating">Rating</option>
+            <option value="workExperience">Experience</option>
           </select>
         </div>
+      </div>
+    </form>
   </div>
-</form>
-  </div>
-<br>
-<br>
+
+  <br><br>
+
   <div id="main">
     <% for (let i = 0; i < data.length; i++) { %>
       <div id="info">
-        <h3>Name: <%= data[i].name %></h3>
-        <br>
-        <p>
-          <b>Specialization:</b> <%= data[i].specialization %><br>
-         <b>City:</b>  <%= data[i].city %><br>
-          <b>Rating:</b> <%= data[i].rating %><br>
-          <b>Hospital Name:</b> <%= data[i].hospitalName %><br>
-          <b>Study:</b> <%= data[i].study %><br>
-          <b>Work Experience:</b> <%= data[i].work_experience %> years
-        </p>
+        <img src="<%= data[i].photo %>" alt="Doctor Photo" />
+        <h3><%= data[i].name %></h3>
+        <p><b>Specialization:</b> <%= data[i].specialization %></p>
+        <p><b>City:</b> <%= data[i].city %></p>
+        <p><b>Rating:</b> <%= data[i].rating %></p>
+        <p><b>Hospital:</b> <%= data[i].hospitalName %></p>
+        <p><b>Study:</b> <%= data[i].study %></p>
+        <p><b>Experience:</b> <%= data[i].workExperience %> years</p>
         <hr>
-        <div>
-          <button type="submit" class="appoint">Appointment</button>
-          <button  class="appoint">Video Call</button>
+
+        <!-- 📅 Appointment Button (opens modal only) -->
+        <button type="button" class="appoint" data-bs-toggle="modal" data-bs-target="#appointModal<%= i %>">
+          📅 Appointment
+        </button>
+
+        <!-- 🎥 Video Call Button (form submit) -->
+        <form action="/request-chat" method="POST" style="display:inline;">
+          <input type="hidden" name="doctorId" value="<%= data[i]._id %>">
+          <input type="hidden" name="type" value="video">
+          <button type="submit" class="appoint">🎥 Video Call</button>
+        </form>
+      </div>
+
+      <!-- 📅 Appointment Modal -->
+      <div class="modal fade" id="appointModal<%= i %>" tabindex="-1" aria-labelledby="appointModalLabel<%= i %>" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form action="/request-appoint" method="POST">
+              <div class="modal-header">
+                <h5 class="modal-title" id="appointModalLabel<%= i %>">Book Appointment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="doctorId" value="<%= data[i]._id %>">
+                <input type="hidden" name="type" value="appointment">
+                <label>Date:</label>
+                <input type="date" name="date" class="form-control" required />
+                <label class="mt-2">Time:</label>
+                <input type="time" name="time" class="form-control" required />
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     <% } %>
   </div>
+
+  <script>
+    document.getElementById("back").addEventListener("click", function () {
+      window.history.back();
+    });
+  </script>
+
+  <!-- Bootstrap JS for modal support -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-

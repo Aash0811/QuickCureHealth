@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Address Form - QuickCureHealth</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: rgb(201, 201, 201);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+    }
+
+    #main {
+      background-color: #1f8384;
+      border-radius: 2rem;
+      padding: 3rem 2rem;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+
+    h1, h2, h3, hr {
+      text-align: center;
+    }
+
+    .fields {
+      width: 100%;
+      height: 2.7rem;
+      border-radius: 2rem;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding-left: 1rem;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    textarea.fields {
+      height: 10rem;
+      resize: vertical;
+    }
+
+    .btn {
+      background-color: white;
+      color: #1f8384;
+      border: 2px solid #1f8384;
+      border-radius: 10px;
+      width: 100%;
+      height: 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0.8rem 0;
+      cursor: pointer;
+      transition: 0.3s ease-in-out;
+    }
+
+    
+
+    @media (max-width: 576px) {
+      #main {
+        padding: 2rem 1rem;
+      }
+
+      .fields, .btn {
+        font-size: 0.95rem;
+        height: 2.4rem;
+      }
+
+      textarea.fields {
+        height: 8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main">
+    <form action="/address" method="post">
+      <h1>Please Fill in the Details</h1>
+      
+      <input type="text" name="firstName" class="fields" placeholder="First Name" required>
+      <input type="text" name="lastName" class="fields" placeholder="Last Name" required>
+      <input type="tel" name="number" class="fields" placeholder="Phone Number (e.g. +1234567890)" required>
+      
+      <h3>Address</h3>
+      <hr>
+      <button type="button" class="btn" id="locate">Use Current Location</button>
+      <hr>
+      
+      <textarea name="address" id="textbox" class="fields" placeholder="Enter Address" required></textarea>
+      <input type="hidden" name="price" value="<%= price %>">
+
+      <button type="submit" class="btn">Place Order</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("locate").addEventListener("click", () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const apiKey = "941ea0480ce5451caa6b6b69508bf541"; 
+            const { latitude, longitude } = position.coords;
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+
+            fetch(url)
+              .then(response => response.json())
+              .then(data => {
+                const components = data.results[0].components;
+                const road = components.road || '';
+                const city = components.city || components.town || '';
+                const state = components.state || '';
+                const country = components.country || '';
+                document.getElementById("textbox").value = `${road}, ${city}, ${state}, ${country}`;
+              })
+              .catch(error => {
+                console.error('Location fetch error:', error);
+                alert("Failed to get location.");
+              });
+          },
+          
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    });
+  </script>
+
+</body>
+</html>

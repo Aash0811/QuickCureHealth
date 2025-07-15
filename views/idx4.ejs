@@ -1,0 +1,19 @@
+
+ <link rel="stylesheet" href="idx4.css">
+<body>
+   <div class="search-drug">
+    <form action="/drug" method="GET">
+      <h1 id="search-title">Your Health, Delivered to Your Doorstep <br> Fast, Reliable, and Hassle-Free!</h1>
+      <br>
+      <input type="text" id="selects" list="medicines" name="name" placeholder="Search for medicine..." required>
+      <datalist id="medicines">
+            <% for (let i = 0; i < drugs.length; i++) { %>
+              <option value="<%= drugs[i].name %>"></option>
+            <% } %>
+          </datalist>
+     <button  class="search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+   </div>
+
+</body>
+ <%layout("/boilerplate/cart.ejs")%>

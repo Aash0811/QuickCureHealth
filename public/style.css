@@ -239,3 +239,90 @@ a{
     margin-top: 20px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+
+
+/* === Responsive Styles === */
+
+/* Phones and small devices */
+@media (max-width: 768px) {
+    .navigation {
+        flex-direction: column;
+        height: auto;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .applogo h3 {
+        font-size: 30px;
+    }
+
+    .signin, .signinbutton {
+        margin-top: 10px;
+        margin-right: 0;
+        width: 100%;
+    }
+
+    .second {
+        flex-direction: column;
+        align-items: center;
+        margin-left: 0;
+        padding: 0 15px;
+    }
+
+    .maps, .doctors {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .doctors #select {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .search {
+        right: 20px;
+    }
+
+    .image img {
+        height: auto;
+    }
+
+    .mainfour {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .one {
+        width: 90%;
+        max-width: 350px;
+        margin: auto;
+    }
+
+    .fields {
+        flex-direction: column;
+        gap: 20px;
+        padding: 0 15px;
+    }
+
+    .spec {
+        width: 90%;
+        max-width: 300px;
+    }
+
+    .spec img {
+        width: 100%;
+        height: auto;
+    }
+
+    .footer {
+        text-align: center;
+        height: auto;
+        padding: 20px;
+    }
+
+    .footer2 {
+        margin-top: 20px;
+    }
+}

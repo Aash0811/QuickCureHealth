@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background: #e9f7f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      font-weight: bold;
+      font-size: 1.2rem;
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .btn-accept {
+      background-color: #198754;
+      border-color: #198754;
+    }
+
+    .btn-reject {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .no-requests {
+      text-align: center;
+      color: #888;
+      padding: 30px;
+      font-size: 1.2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      color: #0d6efd;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <h2 class="text-center mb-4">🩺 Doctor Dashboard</h2>
+
+    <% var error = typeof error !== 'undefined' ? error : null; %>
+    <% if (error && error.length > 0) { %>
+      <div class="alert alert-danger text-center"><%= error %></div>
+    <% } %>
+
+    <!-- 🔹 VIDEO CALL / CHAT REQUESTS -->
+    <div>
+      <div class="section-title">📹 Video Call Requests</div>
+
+      <% let chatRequests = requests.filter(r => r.type === 'video'); %>
+
+      <% if (chatRequests.length > 0) { %>
+        <% chatRequests.forEach(function(request) { %>
+          <div class="card">
+            <div class="card-header">New Chat Request</div>
+            <div class="card-body">
+              <p><strong>👤 Patient:</strong> <%= request.patient?.username || 'Unknown' %></p>
+              <p><strong>📋 Type:</strong> <%= request.type %></p>
+
+              <div class="d-flex justify-content-end">
+                <form action="/accept-chat" method="POST" class="mr-2">
+                  <input type="hidden" name="requestId" value="<%= request._id %>">
+                  <button class="btn btn-accept">✅ Accept</button>
+                </form>
+
+                <form action="/chat-request/<%= request._id %>/reject" method="POST">
+                  <button class="btn btn-reject">❌ Reject</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="no-requests">
+          <p>🚫 No pending video call requests at the moment.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 🔹 APPOINTMENT REQUESTS -->
+    <div>
+      <div class="section-title">📅 Appointment Requests</div>
+
+      <% let appointmentRequests = requests.filter(r => r.type === 'appointment'); %>
+
+      <% if (appointmentRequests.length > 0) { %>
+        <% appointmentRequests.forEach(function(request) { %>
+          <div class="card">
+            <div class="card-header">New Appointment</div>
+            <div class="card-body">
+              <p><strong>👤 Patient:</strong> <%= request.patient?.username || 'Unknown' %></p>
+              <p><strong>📅 Date:</strong> <%= request.date || 'Not specified' %></p>
+              <p><strong>⏰ Time:</strong> <%= request.time || 'Not specified' %></p>
+              <p><strong>📌 Status:</strong> <%= request.status %></p>
+
+              <div class="d-flex justify-content-end">
+                <!-- Accept Button -->
+                <form action="/accept-appointment" method="POST" class="mr-2">
+                  <input type="hidden" name="requestId" value="<%= request._id %>">
+                  <button class="btn btn-success">✅ Accept</button>
+                </form>
+
+                <!-- Delete Button -->
+                <form action="/delete-appointment/<%= request._id %>" method="POST">
+                  <button class="btn btn-danger">🗑️ Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="no-requests">
+          <p>📭 No upcoming appointments.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+
+</body>
+</html>

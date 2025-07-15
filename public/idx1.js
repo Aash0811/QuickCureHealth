@@ -42,5 +42,5 @@ button.addEventListener("click", async function (event) {
 });
 let back=document.querySelector("#back");
 back.addEventListener("click",function(){
-  window.location.href="/";
+  window.history.back();
 });

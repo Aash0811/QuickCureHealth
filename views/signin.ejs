@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/signin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <form action="/login" method="POST">
+    <div id="main">
+        <h1>Welcome back!</h1>
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter Username" name="username" required>
+        <br>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter Password" name="password" required>
+        <br>
+        <div id="show-password-container">
+            <input type="checkbox" id="show-password"> 
+        <label for="show-password"> &nbsp;Show Password</label>
+        </div>
+        
+        <br>
+        <button type="submit">Sign In</button>
+        <p>Don't have an account?<a href="/signup"> Sign up</a></p>
+            </div>
+            </form>
+</body>
+<script >
+    document.querySelector("#show-password").addEventListener("change",()=>{
+        const pass=document.querySelector("#password");
+        pass.type=(pass.type==="password")?"text":"password";
+    })
+</script>
+</html>

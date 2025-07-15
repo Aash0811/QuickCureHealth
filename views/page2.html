@@ -23,13 +23,19 @@
       <span class="close" onclick="closeModal()">&times;</span>
       <h2 id="selectedTestTitle"></h2>
       <p id="price"></p>
-      <form id="appointmentForm">
-        <input type="text" placeholder="Full Name" required>
-        <input type="email" placeholder="Email" required>
-        <input type="tel" placeholder="Phone Number" required>
-        <input type="number" placeholder="Age" required>
-        <input type="date" required>
-        <input type="time" required>
+      <form id="appointmentForm" >
+        <label for="fullName" style="font-weight:600;margin-top:10px;">Full Name</label>
+        <input id="fullName" type="text" placeholder="Enter your full name" required>
+        <label for="email" style="font-weight:600;margin-top:10px;">Email</label>
+        <input id="email" type="email" placeholder="Enter your email" required>
+        <label for="phone" style="font-weight:600;margin-top:10px;">Phone Number</label>
+        <input id="phone" type="tel" placeholder="Enter your phone number" required>
+        <label for="age" style="font-weight:600;margin-top:10px;">Age</label>
+        <input id="age" type="number" placeholder="Enter your age" required>
+        <label for="date" style="font-weight:600;margin-top:10px;">Test Date</label>
+        <input id="date" type="date" required>
+        <label for="time" style="font-weight:600;margin-top:10px;">Test Time</label>
+        <input id="time" type="time" required>
         <button type="submit">Proceed to Payment</button>
       </form>
     </div>

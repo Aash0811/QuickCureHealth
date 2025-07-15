@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Room</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background: #ece5dd;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-wrapper {
+      max-width: 900px;
+      margin: 30px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #075e54;
+      color: white;
+      padding: 15px 20px;
+      font-size: 1.4rem;
+    }
+
+    #chat-box {
+      height: 500px;
+      overflow-y: auto;
+      background: #f0f0f0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message, .file-message {
+      max-width: 70%;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      border-radius: 20px;
+      position: relative;
+      word-break: break-word;
+      text-decoration: none;
+    }
+
+    .user {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+      border-bottom-right-radius: 0;
+      text-align: left;
+    }
+
+    .doctor {
+      align-self: flex-start;
+      background-color: #fff;
+      border-bottom-left-radius: 0;
+      text-align: left;
+    }
+
+    .message small {
+      display: block;
+      font-size: 0.75rem;
+      color: #777;
+      margin-top: 5px;
+    }
+
+    .chat-footer {
+      background: #fff;
+      padding: 10px 20px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-control {
+      border-radius: 20px;
+    }
+
+    .btn-send {
+      border-radius: 20px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #bbb;
+      color: white;
+      text-align: center;
+      line-height: 32px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-right: 8px;
+      display: inline-block;
+    }
+
+    video {
+      width: 45%;
+      height: auto;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #video-section {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #fileForm {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-wrapper">
+  <div class="chat-header">
+    🩺 Chat with <strong><%= otherUserName %></strong>
+  </div>
+
+  <div id="video-section">
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video><br>
+    <button id="startCall" class="btn btn-primary mt-2">Start Video Call</button>
+    <button id="endCall" class="btn btn-danger mt-2">End Call</button>
+  </div>
+
+  <div id="chat-box">
+    <% const currentName = currentUser.username || currentUser.name; %>
+    <% const currentModel = userModel; %>
+
+   <% messages.forEach(msg => {
+  const isSender = msg.senderName === currentName && msg.senderModel === currentModel;
+%>
+  <div class="message <%= isSender ? 'user' : 'doctor' %>">
+    <div class="d-flex align-items-center mb-1">
+      <div class="avatar"><%= msg.senderName.charAt(0).toUpperCase() %></div>
+      <strong><%= msg.senderName %></strong>
+    </div>
+
+    <% if (msg.text) { %>
+      <div><%= msg.text %></div>
+    <% } else if (msg.file) { %>
+      <div><a href="<%= msg.file.fileData %>" download="<%= msg.file.fileName %>">📎 <%= msg.file.fileName %></a></div>
+    <% } %>
+
+    <small><%= msg.timestamp %></small>
+  </div>
+<% }) %>
+
+  </div>
+
+  <div class="chat-footer">
+    <input id="message" class="form-control" placeholder="Type a message..." autocomplete="off" />
+    <button type="submit" class="btn btn-success btn-send" id="send-btn">Send</button>
+  </div>
+
+  <form id="fileForm">
+    <input type="file" id="fileInput" class="form-control" />
+    <button type="submit" class="btn btn-info">Send File</button>
+  </form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const chatId = "<%= chatId %>";
+  const userName = "<%= currentUser.username || currentUser.name %>";
+  const userModel = "<%= userModel %>";
+
+  socket.emit("joinRoom", chatId);
+
+  const chatBox = document.getElementById("chat-box");
+  const input = document.getElementById("message");
+  const sendBtn = document.getElementById("send-btn");
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+  function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    socket.emit("message", {
+      chatId,
+      sender: userName,
+      senderModel: userModel,
+      text
+    });
+
+    input.value = "";
+  }
+
+  socket.on("message", ({ sender, senderModel, text, timestamp }) => {
+    const isSender = sender === userName && senderModel === userModel;
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", isSender ? "user" : "doctor");
+
+    const avatar = `<div class="d-flex align-items-center mb-1">
+                      <div class="avatar">${sender.charAt(0).toUpperCase()}</div>
+                      <strong>${sender}</strong>
+                    </div>`;
+
+    messageDiv.innerHTML = `${avatar}<div>${text}</div><small>${timestamp}</small>`;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+
+  // FILE SHARING
+  document.getElementById("fileForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    socket.emit("file-share", {
+      chatId,
+      sender: userName,
+      senderModel: userModel,
+      fileName: file.name,
+      fileData: reader.result,
+    });
+  };
+  reader.readAsDataURL(file);
+});
+
+
+ socket.on("file-share", ({ fileName, fileData, sender, senderModel, timestamp }) => {
+  const isSender = sender === userName && senderModel === userModel;
+  const fileLink = document.createElement("a");
+  fileLink.href = fileData;
+  fileLink.download = fileName;
+  fileLink.textContent = `📎 ${fileName}`;
+  fileLink.target = "_blank";
+
+  const fileDiv = document.createElement("div");
+  fileDiv.classList.add("message", isSender ? "user" : "doctor");
+
+  const avatar = `<div class="d-flex align-items-center mb-1">
+                    <div class="avatar">${sender.charAt(0).toUpperCase()}</div>
+                    <strong>${sender}</strong>
+                  </div>`;
+
+  fileDiv.innerHTML = `${avatar}<div></div>`;
+  fileDiv.children[1].appendChild(fileLink);
+  fileDiv.innerHTML += `<small>${timestamp}</small>`;
+
+  chatBox.appendChild(fileDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+
+  // WEBRTC
+  const localVideo = document.getElementById("localVideo");
+  const remoteVideo = document.getElementById("remoteVideo");
+  const startCallBtn = document.getElementById("startCall");
+  const endCallBtn = document.getElementById("endCall");
+
+  let localStream;
+  let peerConnection;
+
+  const servers = {
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+  };
+
+  socket.on("user-joined", async () => {
+    peerConnection = new RTCPeerConnection(servers);
+
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
+      }
+    };
+
+    peerConnection.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+    };
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit("offer", { offer, roomId: chatId });
+  });
+
+  socket.on("offer", async ({ offer }) => {
+    peerConnection = new RTCPeerConnection(servers);
+
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
+      }
+    };
+
+    peerConnection.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+    };
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit("answer", { answer, roomId: chatId });
+  });
+
+  socket.on("answer", async ({ answer }) => {
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+
+  socket.on("ice-candidate", ({ candidate }) => {
+    if (peerConnection) {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+  });
+
+  startCallBtn.addEventListener("click", async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideo.srcObject = localStream;
+    socket.emit("start-call", chatId);
+  });
+
+  endCallBtn.addEventListener("click", () => {
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnection = null;
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+    }
+  });
+</script>
+
+</body>
+</html>
