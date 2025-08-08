@@ -58,6 +58,14 @@ img{
     padding: 4px 4px; */
     
 }
+ @media (min-width: 1200px) {
+    .main, .desc {
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+ }
+
  @media (max-width: 768px) {
     .main {
       flex-direction: column;

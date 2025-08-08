@@ -85,3 +85,34 @@ button{
     margin: 0.5rem 0;
     font-size: larger;
 }
+@media (max-width: 768px) {
+  #main {
+    width: 80%;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #main {
+    width: 90%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  label {
+    font-size: 1.2rem;
+  }
+
+  input {
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  button {
+    width: 100%;
+  }
+}

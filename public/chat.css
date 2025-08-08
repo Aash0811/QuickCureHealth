@@ -49,3 +49,33 @@ body {
   border-radius: 10px;
   text-align: left;
 }
+@media (max-width: 768px) {
+  #chat-box {
+    padding: 15px;
+  }
+
+  #chat-form input {
+    width: 70%;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  #chat-box {
+    padding: 10px;
+  }
+
+  #chat-form input {
+    width: 60%;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  #chat-form button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+}

@@ -122,4 +122,36 @@ body {
   background: #17696a;
   box-shadow: 0 4px 16px #1f838444;
 }
+@media (max-width: 768px) {
+  header {
+    padding: 2rem;
+  }
+
+  .payment-container {
+    width: 80%;
+    margin: 10% auto;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    flex-direction: column;
+    height: auto;
+    padding: 1.5rem;
+  }
+
+  .logo {
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+  }
+
+  .back-btn {
+    padding: 0.8rem 1.5rem;
+  }
+
+  .payment-container {
+    width: 90%;
+    padding: 1.5rem;
+  }
+}
   

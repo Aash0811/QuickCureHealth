@@ -244,6 +244,21 @@ a{
 
 /* === Responsive Styles === */
 
+@media (max-width: 1200px) {
+    .mainfour, .fields {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Tablets and small desktops */
+@media (max-width: 992px) {
+    .one {
+        width: 45%;
+        margin-bottom: 30px;
+    }
+}
+
 /* Phones and small devices */
 @media (max-width: 768px) {
     .navigation {
@@ -324,5 +339,20 @@ a{
 
     .footer2 {
         margin-top: 20px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .applogo h3 {
+        font-size: 24px;
+    }
+
+    .one .caption {
+        font-size: 16px;
+    }
+
+    .footer h5, .footer p {
+        font-size: 14px;
     }
 }

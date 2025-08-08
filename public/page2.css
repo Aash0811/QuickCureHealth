@@ -180,4 +180,42 @@ body {
   background: #17696a;
   box-shadow: 0 4px 16px #1f838444;
 }
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    height: auto;
+    padding: 1.5rem;
+  }
+
+  .logo {
+    margin-bottom: 1rem;
+  }
+
+  main {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 1rem;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .signin-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  main {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+}
   
