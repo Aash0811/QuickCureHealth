@@ -17,7 +17,7 @@ const io = require("socket.io")(http);
 dotenv.config();
 const cors = require('cors');
 app.use(cors());
-const sendEmail=require("./utils/mailer.js");
+const sendEmail = require("./utils/mailer.js");
 app.use(methodOverride("_method"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -50,121 +50,6 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   next();
 });
-app.post("/request-chat", async (req, res) => {
-  if (!req.user) {
-    req.flash("error", "You must be logged in to request a chat.");
-    return res.redirect("/login");
-  }
-  const { doctorId, type } = req.body;
-  const patientId = req.user._id;
-
-  const existingRequest = await ChatRequest.findOne({
-    doctor: doctorId,
-    patient: patientId,
-    status: { $in: ["pending", "accepted"] },
-  });
-
-  if (existingRequest) {
-    req.flash("error", "You already have an active chat request with this doctor.");
-    return res.redirect("/patient-dashboard");
-  }
-
-  const newRequest = new ChatRequest({
-    doctor: doctorId,
-    patient: patientId,
-    type,
-    status: "pending",
-  });
-
-  await newRequest.save();
-  res.redirect("/patient-dashboard");
-});
- app.post("/request-chat", async (req, res) => {
-    if (!req.user) {
-      req.flash("error", "You must be logged in to request a chat.");
-      return res.redirect("/login");
-    }
-    const { doctorId, type } = req.body;
-    const patientId = req.user._id;
-  
-    const existingRequest = await ChatRequest.findOne({
-      doctor: doctorId,
-      patient: patientId,
-      status: { $in: ["pending", "accepted"] },
-    });
-  
-    if (existingRequest) {
-      req.flash("error", "You already have an active chat request with this doctor.");
-      return res.redirect("/patient-dashboard");
-    }
-  
-    const newRequest = new ChatRequest({
-      doctor: doctorId,
-      patient: patientId,
-      type,
-      status: "pending",
-    });
-  
-    await newRequest.save();
-    res.redirect("/patient-dashboard");
-  });  app.post("/request-chat", async (req, res) => {
-    if (!req.user) {
-      req.flash("error", "You must be logged in to request a chat.");
-      return res.redirect("/login");
-    }
-    const { doctorId, type } = req.body;
-    const patientId = req.user._id;
-  
-    const existingRequest = await ChatRequest.findOne({
-      doctor: doctorId,
-      patient: patientId,
-      status: { $in: ["pending", "accepted"] },
-    });
-  
-    if (existingRequest) {
-      req.flash("error", "You already have an active chat request with this doctor.");
-      return res.redirect("/patient-dashboard");
-    }
-  
-    const newRequest = new ChatRequest({
-      doctor: doctorId,
-      patient: patientId,
-      type,
-      status: "pending",
-    });
-  
-    await newRequest.save();
-    res.redirect("/patient-dashboard");
-  });  app.post("/request-chat", async (req, res) => {
-    if (!req.user) {
-      req.flash("error", "You must be logged in to request a chat.");
-      return res.redirect("/login");
-    }
-    const { doctorId, type } = req.body;
-    const patientId = req.user._id;
-  
-    const existingRequest = await ChatRequest.findOne({
-      doctor: doctorId,
-      patient: patientId,
-      status: { $in: ["pending", "accepted"] },
-    });
-  
-    if (existingRequest) {
-      req.flash("error", "You already have an active chat request with this doctor.");
-      return res.redirect("/patient-dashboard");
-    }
-  
-    const newRequest = new ChatRequest({
-      doctor: doctorId,
-      patient: patientId,
-      type,
-      status: "pending",
-    });
-  
-    await newRequest.save();
-    res.redirect("/patient-dashboard");
-  });
-
 
 async function init() {
   try {
@@ -185,10 +70,8 @@ const ChatMessage = require("./models/chatMessage");
 const Doctor = require("./models/doctor.js");
 passport.use("doctor-local", Doctor.createStrategy());
 passport.use("user-local", User.createStrategy());
-
-// Custom serialize/deserialize for both user types
 passport.serializeUser(function(user, done) {
-  // If the user is a doctor, set type to 'doctor', else 'user'
+  
   const type = user && user.specialization !== undefined ? "doctor" : "user";
   done(null, { id: user._id, type });
 });
@@ -284,6 +167,46 @@ app.post("/request-appoint", async (req, res) => {
 
   await newRequest.save();
   res.redirect("/patient-dashboard");
+});
+app.post("/accept-appointment", async (req, res) => {
+  try {
+    const { requestId } = req.body; // <-- use body, not params
+    const chatRequest = await ChatRequest.findByIdAndUpdate(
+      requestId,
+      { status: "accepted" },
+      { new: true }
+    ).populate("patient doctor"); // <-- correct fields
+
+    if (!chatRequest) {
+      req.flash("error", "Appointment not found.");
+      return res.redirect("/doctor-dashboard");
+    }
+
+    const patientEmail = chatRequest.patient.email;
+    const doctorName = chatRequest.doctor.name;
+    const appointmentDate = chatRequest.date;
+    const appointmentTime = chatRequest.time;
+
+    const subject = "Your Appointment Has Been Accepted!";
+    const html = `
+      <h2>Appointment Confirmed</h2>
+      <p>Dear ${chatRequest.patient.username || chatRequest.patient.name},</p>
+      <p>Your appointment with Dr. ${doctorName} has been <b>accepted</b>.</p>
+      <p><b>Date:</b> ${appointmentDate}</p>
+      <p><b>Time:</b> ${appointmentTime}</p>
+      <p><b>address:</b>${chatRequest.doctor.hospitalName},${chatRequest.doctor.city}</p>
+      <p>Thank you for using QuickCureHealth.</p>
+    `;
+
+    await sendEmail(patientEmail, subject, html);
+
+    req.flash("success", "Appointment accepted and patient notified by email.");
+    res.redirect(`/chat/${requestId}`);
+  } catch (err) {
+    console.error("Error accepting appointment:", err);
+    req.flash("error", "Failed to accept appointment.");
+    res.redirect("/doctor-dashboard");
+  }
 });
 app.post('/delete-appointment/:id', async (req, res) => {
   try {

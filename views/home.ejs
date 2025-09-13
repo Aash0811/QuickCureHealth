@@ -138,16 +138,43 @@
         <p>Psychologist</p>
    </div>
    </div>
-    <div class="footer">
-        <br>
-        <div class="footer1">
-            <h5>We are here to help you with your health issues</h5>
-        </div>
-        <div class="footer2">
-            <h3>Contact Us</h3>
-            <p>phone:+91 1234567890</p>
-            <a href="mailto:quickcurehealth@gmail.com"> <p>mail: quickcurehealth@gmail.com</p></a>
-   </div>
+    <!-- Modern Footer Start -->
+<footer class="footer bg-white text-dark pt-4 pb-2 mt-5 border-top shadow-sm">
+  <div class="container">
+    <div class="row align-items-center">
+      <!-- Logo & About -->
+      <div class="col-md-4 mb-3 mb-md-0 text-center text-md-start">
+        <h4 class="mb-2 fw-bold" style="color:#1f8384;">QuickCureHealth</h4>
+        <p style="font-size: 0.95rem;">Your trusted partner for health, appointments, and online consultations.</p>
+      </div>
+      <!-- Contact Info -->
+      <div class="col-md-4 mb-3 mb-md-0 text-center">
+        <h5 class="fw-semibold">Contact Us</h5>
+        <p class="mb-1"><i class="fa-solid fa-phone me-2"></i>+91 1234567890</p>
+        <p class="mb-1"><i class="fa-solid fa-envelope me-2"></i>
+          <a href="mailto:quickcurehealth@gmail.com" class="text-dark text-decoration-underline">quickcurehealth@gmail.com</a>
+        </p>
+        <p class="mb-0"><i class="fa-solid fa-location-dot me-2"></i>India</p>
+      </div>
+      <!-- Social Media -->
+      <div class="col-md-4 text-center text-md-end">
+        <h5 class="fw-semibold">Follow Us</h5>
+        <a href="https://facebook.com/" target="_blank" class="text-dark me-2 fs-4"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://twitter.com/" target="_blank" class="text-dark me-2 fs-4"><i class="fab fa-twitter"></i></a>
+        <a href="https://instagram.com/" target="_blank" class="text-dark me-2 fs-4"><i class="fab fa-instagram"></i></a>
+        <a href="https://linkedin.com/" target="_blank" class="text-dark me-2 fs-4"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://youtube.com/" target="_blank" class="text-dark fs-4"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+    <hr class="bg-secondary my-3">
+    <div class="row">
+      <div class="col-12 text-center">
+        <small class="text-secondary">&copy; <%= new Date().getFullYear() %> QuickCureHealth. All rights reserved.</small>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Modern Footer End -->
 </body>
 <script src="app.js">
     document.querySelector("#citySelect").addEventListener("change",()=>{
