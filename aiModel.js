@@ -4,7 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
-// this is aimodel
+// this is aimodel useing meta/llama
 export const aiModel = async (query) => {
 try {
     const completion = await openai.chat.completions.create({
