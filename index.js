@@ -62,7 +62,13 @@ async function init() {
     console.error("Database connection failed:", error);
   }
 }
-init();
+
+// Skip database connection and server start during Netlify builds
+if (!process.env.NETLIFY) {
+  init();
+} else {
+  console.log("Skipping database connection during Netlify build");
+}
 const Drug=require("./models/druglist.js");
 const ChatRequest = require("./models/chat.js");
 const ChatMessage = require("./models/chatMessage");
@@ -89,9 +95,14 @@ passport.deserializeUser(async function(obj, done) {
     done(err);
   }
 });
-http.listen(port, () => {
-  console.log(`App is listening on port ${port}`);
-});
+// Skip server start during Netlify builds
+if (!process.env.NETLIFY) {
+  http.listen(port, () => {
+    console.log(`App is listening on port ${port}`);
+  });
+} else {
+  console.log("Skipping server start during Netlify build");
+}
 
 app.get("/", (req, res) => {
   res.render("home.ejs", { loc: req.session.loc || null });
