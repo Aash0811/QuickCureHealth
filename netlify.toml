@@ -1,7 +1,0 @@
-[build]
-  # Do not run the Express server during builds - Netlify is for static sites
-  command = "echo 'Build complete - this is a backend app that should be deployed elsewhere'"
-  publish = "public"
-
-[build.environment]
-  NODE_VERSION = "22"
