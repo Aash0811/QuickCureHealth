@@ -656,7 +656,6 @@ app.post('/send-otp', async (req, res) => {
 });
 
 app.post('/verify-otp', async (req, res) => {
-  try {
     const { email, otp } = req.body;
 
     if (!otpStore[email]) {
