@@ -41,7 +41,7 @@ const tests = [
 ];
 
 async function seed() {
-  await mongoose.connect('mongodb://localhost:27017/main', {
+  await mongoose.connect('mongodb+srv://quickcurehealth:quickcurehealth@cluster0.iqv2slt.mongodb.net/?appName=Cluster0', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });

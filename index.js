@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 
 async function init() {
   try {
-    await mongoose.connect(`mongodb+srv://quickcurehealth:${process.env.DBPASS}@main.crinndq.mongodb.net/?retryWrites=true&w=majority&appName=main`, {
+    await mongoose.connect(`mongodb+srv://quickcurehealth:${process.env.DBPASS}@cluster0.iqv2slt.mongodb.net/?appName=Cluster0`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
