@@ -656,6 +656,7 @@ app.post('/send-otp', async (req, res) => {
 });
 
 app.post('/verify-otp', async (req, res) => {
+  try {
     const { email, otp } = req.body;
 
     if (!otpStore[email]) {
@@ -673,22 +674,26 @@ app.post('/verify-otp', async (req, res) => {
 
     delete otpStore[email];
 
-  const signupData = req.session.signupData;
-  if (!signupData || signupData.email !== email) {
-    return res.send('Signup session expired or invalid');
-  }
-  try {
+    const signupData = req.session.signupData;
+    if (!signupData || signupData.email !== email) {
+      return res.status(400).send('Signup session expired or invalid');
+    }
+
     const user = await User.register(
       new User({ username: signupData.username, email: signupData.email }),
       signupData.password
     );
     req.login(user, (err) => {
-      if (err) return res.send('Login error after registration');
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).send('Login error after registration');
+      }
       delete req.session.signupData;
       return res.redirect("/");
     });
-  } catch (err) {
-    return res.send('Registration failed: ' + err.message);
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).send('OTP verification failed. Please try again.');
   }
 });
 
