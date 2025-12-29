@@ -634,30 +634,45 @@ app.get("/address",(req,res)=>{
 
 let otpStore = {}; 
 app.post('/send-otp', async (req, res) => {
-  const { username, password, email } = req.body;
-  const user = await User.findOne({ email });
-  if (user) return res.send('User already exists');
+  try {
+    const { username, password, email } = req.body;
+    const user = await User.findOne({ email });
+    if (user) return res.send('User already exists');
 
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  otpStore[email] = otp;
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    otpStore[email] = { code: otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
-  req.session.signupData = { username, password, email };
+    req.session.signupData = { username, password, email };
 
-  await sendEmail(email, 'Your OTP Code', `
-    <p>Your OTP is: <strong>${otp}</strong></p>
-    <p>It is valid for 5 minutes.</p>
-  `);
-  res.render("otp-verify.ejs", { email });
+    await sendEmail(email, 'Your OTP Code', `
+      <p>Your OTP is: <strong>${otp}</strong></p>
+      <p>It is valid for 5 minutes.</p>
+    `);
+    res.render("otp-verify.ejs", { email });
+  } catch (error) {
+    console.error('OTP send error:', error);
+    res.status(500).send('Failed to send OTP. Please try again.');
+  }
 });
 
 app.post('/verify-otp', async (req, res) => {
-  const { email, otp } = req.body;
+  try {
+    const { email, otp } = req.body;
 
-  if (!otpStore[email] || otpStore[email].toString() !== otp.toString()) {
-    return res.send('Invalid OTP');
-  }
+    if (!otpStore[email]) {
+      return res.status(400).send('OTP expired or not sent. Please request a new OTP.');
+    }
 
-  delete otpStore[email];
+    if (Date.now() > otpStore[email].expiresAt) {
+      delete otpStore[email];
+      return res.status(400).send('OTP expired. Please request a new OTP.');
+    }
+
+    if (otpStore[email].code.toString() !== otp.toString()) {
+      return res.status(400).send('Invalid OTP');
+    }
+
+    delete otpStore[email];
 
   const signupData = req.session.signupData;
   if (!signupData || signupData.email !== email) {
