@@ -146,4 +146,20 @@
 
 </body>
 </html>
-<script>window.location.replace("");</script>
+<script>
+  // Clear browser history - prevent going back to previous pages
+  window.addEventListener('load', function() {
+    // Replace current history entry
+    window.history.replaceState(null, null, window.location.href);
+    
+    // Push a dummy state multiple times to prevent back navigation
+    for(let i = 0; i < 10; i++) {
+      window.history.pushState(null, null, window.location.href);
+    }
+    
+    // Prevent back button
+    window.addEventListener('popstate', function() {
+      window.history.pushState(null, null, window.location.href);
+    });
+  });
+</script>
