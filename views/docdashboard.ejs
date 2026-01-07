@@ -144,22 +144,19 @@
 
   </div>
 
+  <script>
+    // Prevent back navigation on this page
+    (function() {
+      // Replace current history entry, then push one so back goes to this same page
+      window.history.replaceState(null, null, window.location.href);
+      window.history.pushState(null, null, window.location.href);
+
+      // If user tries to go back, push them forward again
+      window.addEventListener('popstate', function () {
+        window.history.pushState(null, null, window.location.href);
+      });
+    })();
+  </script>
+
 </body>
 </html>
-<script>
-  // Clear browser history - prevent going back to previous pages
-  window.addEventListener('load', function() {
-    // Replace current history entry
-    window.history.replaceState(null, null, window.location.href);
-    
-    // Push a dummy state multiple times to prevent back navigation
-    for(let i = 0; i < 10; i++) {
-      window.history.pushState(null, null, window.location.href);
-    }
-    
-    // Prevent back button
-    window.addEventListener('popstate', function() {
-      window.history.pushState(null, null, window.location.href);
-    });
-  });
-</script>
