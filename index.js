@@ -62,13 +62,6 @@ async function init() {
     console.error("Database connection failed:", error);
   }
 }
-
-// Skip database connection and server start during Netlify builds
-if (!process.env.NETLIFY) {
-  init();
-} else {
-  console.log("Skipping database connection during Netlify build");
-}
 const Drug=require("./models/druglist.js");
 const ChatRequest = require("./models/chat.js");
 const ChatMessage = require("./models/chatMessage");
@@ -95,14 +88,6 @@ passport.deserializeUser(async function(obj, done) {
     done(err);
   }
 });
-// Skip server start during Netlify builds
-if (!process.env.NETLIFY) {
-  http.listen(port, () => {
-    console.log(`App is listening on port ${port}`);
-  });
-} else {
-  console.log("Skipping server start during Netlify build");
-}
 
 app.get("/", (req, res) => {
   res.render("home.ejs", { loc: req.session.loc || null });
@@ -148,6 +133,7 @@ app.get("/patient-dashboard", async (req, res) => {
 app.get("/doctor-dashboard", async (req, res) => {
   if (!req.user) return res.redirect("/doctor-login");
   const requests = await ChatRequest.find({ doctor: req.user._id }).populate("patient");
+  res.set("Cache-control","no-store");
   res.render("docdashboard", { requests, error: null });
 });
 app.post("/request-appoint", async (req, res) => {
@@ -166,7 +152,6 @@ app.post("/request-appoint", async (req, res) => {
     return res.redirect("/patient-dashboard");
   }
 
-  // Otherwise, create a new request
   const newRequest = new ChatRequest({
     doctor: doctorId,
     patient: patientId,
@@ -181,12 +166,12 @@ app.post("/request-appoint", async (req, res) => {
 });
 app.post("/accept-appointment", async (req, res) => {
   try {
-    const { requestId } = req.body; // <-- use body, not params
+    const { requestId } = req.body; 
     const chatRequest = await ChatRequest.findByIdAndUpdate(
       requestId,
       { status: "accepted" },
       { new: true }
-    ).populate("patient doctor"); // <-- correct fields
+    ).populate("patient doctor"); 
 
     if (!chatRequest) {
       req.flash("error", "Appointment not found.");
@@ -310,7 +295,7 @@ io.on("connection", (socket) => {
     socket.join(chatId);
   });
 
-  // Real-time messaging
+
   socket.on("message", async ({ chatId, sender, senderModel, text }) => {
     if (!chatId || !sender || !text || !senderModel) return;
 
@@ -339,7 +324,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // 🔁 File Sharing
  socket.on("file-share", async ({ chatId, fileName, fileData, sender, senderModel }) => {
   if (!chatId || !fileName || !fileData || !sender || !senderModel) {
     console.error("Missing data in file-share");
@@ -736,7 +720,6 @@ app.post("/doctor-login", (req, res, next) => {
     }
     req.logIn(doctor, (err) => {
       if (err) return next(err);
-      res.set("Cache-control","no-store");
       return res.redirect("/doctor-dashboard");
     });
   })(req, res, next);
