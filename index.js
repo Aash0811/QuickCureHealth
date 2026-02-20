@@ -736,6 +736,7 @@ app.post("/doctor-login", (req, res, next) => {
     }
     req.logIn(doctor, (err) => {
       if (err) return next(err);
+      res.set("Cache-control","no-store");
       return res.redirect("/doctor-dashboard");
     });
   })(req, res, next);
