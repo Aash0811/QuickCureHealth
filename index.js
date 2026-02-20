@@ -133,7 +133,6 @@ app.get("/patient-dashboard", async (req, res) => {
 app.get("/doctor-dashboard", async (req, res) => {
   if (!req.user) return res.redirect("/doctor-login");
   const requests = await ChatRequest.find({ doctor: req.user._id }).populate("patient");
-  res.set("Cache-control","no-store");
   res.render("docdashboard", { requests, error: null });
 });
 app.post("/request-appoint", async (req, res) => {

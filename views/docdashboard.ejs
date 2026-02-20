@@ -143,15 +143,17 @@
     </div>
 
   </div>
-
+ 
   <script>
     (function() {
-      window.history.replaceState(null, null, window.location.href);
-      window.history.pushState(null, null, window.location.href);
-      window.addEventListener('popstate', function () {
-        window.history.pushState(null, null, window.location.href);
-      });
-    })();
+  function preventBack() {
+    window.history.forward();
+  }
+  preventBack(); 
+  setInterval(preventBack, 0);  
+  window.onpopstate = preventBack;
+  window.onunload = function() {};  
+})();
   </script>
 
 </body>
