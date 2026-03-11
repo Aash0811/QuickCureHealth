@@ -63,6 +63,7 @@ async function init() {
     console.error("Database connection failed:", error);
   }
 }
+init();
 const Drug=require("./models/druglist.js");
 const ChatRequest = require("./models/chat.js");
 const ChatMessage = require("./models/chatMessage");
