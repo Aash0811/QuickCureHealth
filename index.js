@@ -34,6 +34,9 @@ const mate = require("ejs-mate");
 app.engine("ejs", mate);
 
 const mongoose = require("mongoose");
+app.listen(8080,()=>{
+  console.log("app is listening");
+})
 
 const User = require("./models/user.js");
 
