@@ -23,8 +23,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
@@ -74,6 +72,25 @@ passport.serializeUser(function(user, done) {
   const type = user && user.specialization !== undefined ? "doctor" : "user";
   done(null, { id: user._id, type });
 });
+app.post("/doctor-login", (req, res, next) => {
+  console.log("Doctor login POST body:", req.body);
+  passport.authenticate("doctor-local", (err, doctor, info) => {
+    if (err) return next(err);
+    if (!doctor) {
+      return res.render("doctorlogin.ejs", { error: info && info.message ? info.message : "Invalid credentials" });
+    }
+    req.logIn(doctor, (err) => {
+      if (err) return next(err);
+      return res.redirect("/doctor-dashboard" ,{ 
+        title: 'Dashboard',
+        includeSingleTab: true 
+    });
+    });
+  })(req, res, next);
+});
+app.use(express.static(path.join(__dirname, "public")));
+
+
 
 passport.deserializeUser(async function(obj, done) {
   try {
@@ -710,19 +727,7 @@ app.post("/signup", async (req, res) => {
     res.status(500).send("Signup error");
   }
 });
-app.post("/doctor-login", (req, res, next) => {
-  console.log("Doctor login POST body:", req.body);
-  passport.authenticate("doctor-local", (err, doctor, info) => {
-    if (err) return next(err);
-    if (!doctor) {
-      return res.render("doctorlogin.ejs", { error: info && info.message ? info.message : "Invalid credentials" });
-    }
-    req.logIn(doctor, (err) => {
-      if (err) return next(err);
-      return res.redirect("/doctor-dashboard");
-    });
-  })(req, res, next);
-});
+
 app.get("/signout", (req, res) => {
   req.logout(function(err) {
     if (err) {
