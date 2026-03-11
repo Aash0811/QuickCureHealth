@@ -75,6 +75,9 @@ passport.serializeUser(function(user, done) {
   const type = user && user.specialization !== undefined ? "doctor" : "user";
   done(null, { id: user._id, type });
 });
+
+app.use(express.static(path.join(__dirname, "public")));
+
 app.post("/doctor-login", (req, res, next) => {
   console.log("Doctor login POST body:", req.body);
   passport.authenticate("doctor-local", (err, doctor, info) => {
@@ -91,9 +94,6 @@ app.post("/doctor-login", (req, res, next) => {
     });
   })(req, res, next);
 });
-app.use(express.static(path.join(__dirname, "public")));
-
-
 
 passport.deserializeUser(async function(obj, done) {
   try {
