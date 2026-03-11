@@ -143,18 +143,5 @@
     </div>
 
   </div>
- 
-  <script>
-    (function() {
-  function preventBack() {
-    window.history.forward();
-  }
-  preventBack(); 
-  setInterval(preventBack, 0);  
-  window.onpopstate = preventBack;
-  window.onunload = function() {};  
-})();
-  </script>
-
 </body>
 </html>
