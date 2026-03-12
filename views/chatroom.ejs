@@ -172,212 +172,175 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
+  // Declare variables outside to maintain scope
+  let socket;
+  let localStream;
+  let peerConnection;
   const chatId = "<%= chatId %>";
   const userName = "<%= currentUser.username || currentUser.name %>";
   const userModel = "<%= userModel %>";
+  const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-  socket.emit("joinRoom", chatId);
+  // Wait for socket.io to load
+  function initializeSocket() {
+    if (typeof io === 'undefined') {
+      console.warn("socket.io not loaded yet, retrying...");
+      setTimeout(initializeSocket, 100);
+      return;
+    }
 
-  const chatBox = document.getElementById("chat-box");
-  const input = document.getElementById("message");
-  const sendBtn = document.getElementById("send-btn");
-
-  sendBtn.addEventListener("click", sendMessage);
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-  });
-
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
-
-    socket.emit("message", {
-      chatId,
-      sender: userName,
-      senderModel: userModel,
-      text
-    });
-
-    input.value = "";
+    socket = io();
+    setupSocketListeners();
   }
 
-  socket.on("message", ({ sender, senderModel, text, timestamp }) => {
-    const isSender = sender === userName && senderModel === userModel;
-    const messageDiv = document.createElement("div");
-    messageDiv.classList.add("message", isSender ? "user" : "doctor");
+  function setupSocketListeners() {
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("message");
+    const sendBtn = document.getElementById("send-btn");
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+    const startCallBtn = document.getElementById("startCall");
+    const endCallBtn = document.getElementById("endCall");
 
-    const avatar = `<div class="d-flex align-items-center mb-1">
-                      <div class="avatar">${sender.charAt(0).toUpperCase()}</div>
-                      <strong>${sender}</strong>
-                    </div>`;
+    socket.emit("joinRoom", chatId);
 
-    messageDiv.innerHTML = `${avatar}<div>${text}</div><small>${timestamp}</small>`;
-    chatBox.appendChild(messageDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-
-  // FILE SHARING
-  document.getElementById("fileForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    socket.emit("file-share", {
-      chatId,
-      sender: userName,
-      senderModel: userModel,
-      fileName: file.name,
-      fileData: reader.result,
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
     });
-  };
-  reader.readAsDataURL(file);
-});
 
-
- socket.on("file-share", ({ fileName, fileData, sender, senderModel, timestamp }) => {
-  const isSender = sender === userName && senderModel === userModel;
-  const fileLink = document.createElement("a");
-  fileLink.href = fileData;
-  fileLink.download = fileName;
-  fileLink.textContent = `📎 ${fileName}`;
-  fileLink.target = "_blank";
-
-  const fileDiv = document.createElement("div");
-  fileDiv.classList.add("message", isSender ? "user" : "doctor");
-
-  const avatar = `<div class="d-flex align-items-center mb-1">
-                    <div class="avatar">${sender.charAt(0).toUpperCase()}</div>
-                    <strong>${sender}</strong>
-                  </div>`;
-
-  fileDiv.innerHTML = `${avatar}<div></div>`;
-  fileDiv.children[1].appendChild(fileLink);
-  fileDiv.innerHTML += `<small>${timestamp}</small>`;
-
-  chatBox.appendChild(fileDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
-
-
-  // WEBRTC
-  const localVideo = document.getElementById("localVideo");
-  const remoteVideo = document.getElementById("remoteVideo");
-  const startCallBtn = document.getElementById("startCall");
-  const endCallBtn = document.getElementById("endCall");
-
-  let localStream;
-  let peerConnection;
-
-  const servers = {
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-  };
-
-  socket.on("user-joined", async () => {
-    try {
-      if (!localStream) {
-        console.warn("Local stream not available yet. Waiting for media...");
-        return;
-      }
-
-      peerConnection = new RTCPeerConnection(servers);
-
-      localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-      });
-
-      peerConnection.onicecandidate = (e) => {
-        if (e.candidate) {
-          socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
-        }
-      };
-
-      peerConnection.ontrack = (e) => {
-        remoteVideo.srcObject = e.streams[0];
-      };
-
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      socket.emit("offer", { offer, roomId: chatId });
-    } catch (err) {
-      console.error("Error in user-joined handler:", err);
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      socket.emit("message", { chatId, sender: userName, senderModel: userModel, text });
+      input.value = "";
     }
-  });
 
-  socket.on("offer", async ({ offer }) => {
-    try {
-      if (!localStream) {
-        console.warn("Local stream not available yet. Waiting for media...");
-        return;
-      }
+    socket.on("message", ({ sender, senderModel, text, timestamp }) => {
+      const isSender = sender === userName && senderModel === userModel;
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("message", isSender ? "user" : "doctor");
+      const avatar = `<div class="d-flex align-items-center mb-1"><div class="avatar">${sender.charAt(0).toUpperCase()}</div><strong>${sender}</strong></div>`;
+      messageDiv.innerHTML = `${avatar}<div>${text}</div><small>${timestamp}</small>`;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-      peerConnection = new RTCPeerConnection(servers);
+    // FILE SHARING
+    document.getElementById("fileForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        socket.emit("file-share", { chatId, sender: userName, senderModel: userModel, fileName: file.name, fileData: reader.result });
+      };
+      reader.readAsDataURL(file);
+    });
 
-      localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-      });
+    socket.on("file-share", ({ fileName, fileData, sender, senderModel, timestamp }) => {
+      const isSender = sender === userName && senderModel === userModel;
+      const fileLink = document.createElement("a");
+      fileLink.href = fileData;
+      fileLink.download = fileName;
+      fileLink.textContent = `📎 ${fileName}`;
+      fileLink.target = "_blank";
+      const fileDiv = document.createElement("div");
+      fileDiv.classList.add("message", isSender ? "user" : "doctor");
+      const avatar = `<div class="d-flex align-items-center mb-1"><div class="avatar">${sender.charAt(0).toUpperCase()}</div><strong>${sender}</strong></div>`;
+      fileDiv.innerHTML = `${avatar}<div></div>`;
+      fileDiv.children[1].appendChild(fileLink);
+      fileDiv.innerHTML += `<small>${timestamp}</small>`;
+      chatBox.appendChild(fileDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-      peerConnection.onicecandidate = (e) => {
-        if (e.candidate) {
-          socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
+    // WEBRTC
+    socket.on("user-joined", async () => {
+      try {
+        if (!localStream) {
+          console.warn("Local stream not available yet. Waiting for media...");
+          return;
         }
-      };
+        peerConnection = new RTCPeerConnection(servers);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.onicecandidate = (e) => {
+          if (e.candidate) socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
+        };
+        peerConnection.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit("offer", { offer, roomId: chatId });
+      } catch (err) {
+        console.error("Error in user-joined handler:", err);
+      }
+    });
 
-      peerConnection.ontrack = (e) => {
-        remoteVideo.srcObject = e.streams[0];
-      };
+    socket.on("offer", async ({ offer }) => {
+      try {
+        if (!localStream) {
+          console.warn("Local stream not available yet.");
+          return;
+        }
+        peerConnection = new RTCPeerConnection(servers);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.onicecandidate = (e) => {
+          if (e.candidate) socket.emit("ice-candidate", { candidate: e.candidate, roomId: chatId });
+        };
+        peerConnection.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit("answer", { answer, roomId: chatId });
+      } catch (err) {
+        console.error("Error handling offer:", err);
+      }
+    });
 
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answer);
-      socket.emit("answer", { answer, roomId: chatId });
-    } catch (err) {
-      console.error("Error handling offer:", err);
-    }
-  });
+    socket.on("answer", async ({ answer }) => {
+      try {
+        if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+      } catch (err) {
+        console.error("Error handling answer:", err);
+      }
+    });
 
-  socket.on("answer", async ({ answer }) => {
-    try {
+    socket.on("ice-candidate", ({ candidate }) => {
+      if (peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
+    startCallBtn.addEventListener("click", async () => {
+      try {
+        console.log("Requesting media devices...");
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        console.log("Local stream started successfully");
+        socket.emit("start-call", chatId);
+      } catch (err) {
+        console.error("Error accessing media devices:", err);
+        alert("Cannot access camera/microphone. Please check permissions and ensure HTTPS is used.");
+      }
+    });
+
+    endCallBtn.addEventListener("click", () => {
       if (peerConnection) {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        peerConnection.close();
+        peerConnection = null;
       }
-    } catch (err) {
-      console.error("Error handling answer:", err);
-    }
-  });
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+      }
+    });
+  }
 
-  socket.on("ice-candidate", ({ candidate }) => {
-    if (peerConnection) {
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    }
-  });
-
-  startCallBtn.addEventListener("click", async () => {
-    try {
-      console.log("Requesting media devices...");
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-      console.log("Local stream started successfully");
-      socket.emit("start-call", chatId);
-    } catch (err) {
-      console.error("Error accessing media devices:", err);
-      alert("Cannot access camera/microphone. Please check permissions and ensure HTTPS is used.");
-    }
-  });
-
-  endCallBtn.addEventListener("click", () => {
-    if (peerConnection) {
-      peerConnection.close();
-      peerConnection = null;
-    }
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localVideo.srcObject = null;
-      remoteVideo.srcObject = null;
-    }
-  });
+  // Initialize when DOM is ready or if already ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSocket);
+  } else {
+    initializeSocket();
+  }
 </script>
 
 </body>
