@@ -640,21 +640,36 @@ app.get("/address",(req,res)=>{
 })
 
 app.post('/send-otp', async (req, res) => {
-    const { username, password, email } = req.body;
-    const user1 = await User.findOne({ email });
-    if (user1) return res.send('User already exists');
-    const user = await User.register(
-      new User({ username: username, email: email }),
-      password
-    );
-    req.login(user, (err) => {
-      if (err) {
-        console.error('Login error:', err);
-        return res.status(500).send('Login error after registration');
+    try {
+      const { username, password, email } = req.body;
+ 
+      if (!username || !password || !email) {
+        return res.status(400).send('All fields (username, password, email) are required');
       }
-      delete req.session.signupData;
-    });
-    return res.redirect("/");
+
+      const user1 = await User.findOne({ email });
+      if (user1) {
+        return res.status(400).send('User already exists');
+      }
+
+      const user = await User.register(
+        new User({ username: username, email: email }),
+        password
+      );
+
+
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).send('Login error after registration');
+        }
+        delete req.session.signupData;
+        return res.redirect("/");
+      });
+    } catch (err) {
+      console.error('Signup error:', err);
+      res.status(500).send(`Signup error: ${err.message}`);
+    }
 });
 
 
@@ -679,13 +694,28 @@ app.get("/signup", (req, res) => {
 app.post("/signup", async (req, res) => {
   const { username, password, email } = req.body;
   try {
+    // Validate inputs
+    if (!username || !password || !email) {
+      return res.status(400).send("All fields (username, password, email) are required");
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).send("User with this email already exists");
+    }
+
     const user = await User.register(new User({ username, email }), password);
     req.login(user, (err) => {
-      if (err) return res.status(500).send("Login failed");
+      if (err) {
+        console.error("Login error:", err);
+        return res.status(500).send("Login failed after signup");
+      }
       res.redirect("/");
     });
   } catch (err) {
-    res.status(500).send("Signup error");
+    console.error("Signup error:", err);
+    res.status(500).send(`Signup error: ${err.message}`);
   }
 });
 
