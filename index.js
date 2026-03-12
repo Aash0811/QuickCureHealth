@@ -640,14 +640,24 @@ app.get("/address",(req,res)=>{
 })
 
 
-let otpStore = {}; 
 app.post('/send-otp', async (req, res) => {
     const { username, password, email } = req.body;
-    const user = await User.findOne({ email });
-    if (user) return res.send('User already exists');
+    const user1 = await User.findOne({ email });
+    if (user1) return res.send('User already exists');
+    const user = await User.register(
+      new User({ username: username, email: email }),
+      password
+    );
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).send('Login error after registration');
+      }
+      delete req.session.signupData;
+      
+    });
     return res.redirect("/");
 });
-
 
 
 app.get("/login", (req, res) => res.render("dual.ejs"));
