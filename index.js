@@ -639,7 +639,6 @@ app.get("/address",(req,res)=>{
   res.render("address.ejs",{price, WHEATHER_API : process.env.WHEATHER_API})
 })
 
-
 app.post('/send-otp', async (req, res) => {
     const { username, password, email } = req.body;
     const user1 = await User.findOne({ email });
@@ -654,7 +653,6 @@ app.post('/send-otp', async (req, res) => {
         return res.status(500).send('Login error after registration');
       }
       delete req.session.signupData;
-      
     });
     return res.redirect("/");
 });
