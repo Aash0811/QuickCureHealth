@@ -190,7 +190,9 @@
       retryCount++;
       if (retryCount >= maxRetries) {
         console.error("FATAL: socket.io failed to load after " + maxRetries + " retries. Check if /socket.io/socket.io.js is accessible.");
-        return; // Stop retrying
+        // try CDN fallback in case server-side script is unreachable
+        loadCdnSocketIO();
+        return; // Stop retrying further
       }
       setTimeout(initializeSocket, 100);
       return;
@@ -198,6 +200,26 @@
 
     socket = io();
     setupSocketListeners();
+  }
+
+  function loadCdnSocketIO() {
+    const cdnUrl = "https://cdn.socket.io/4.8.1/socket.io.min.js";
+    console.info("Attempting to load Socket.IO from CDN:", cdnUrl);
+    const script = document.createElement("script");
+    script.src = cdnUrl;
+    script.onload = () => {
+      console.log("Socket.IO loaded from CDN, initializing...");
+      if (typeof io !== 'undefined') {
+        socket = io();
+        setupSocketListeners();
+      } else {
+        console.error("CDN load succeeded but io is still undefined");
+      }
+    };
+    script.onerror = () => {
+      console.error("Failed to load Socket.IO from CDN. Video chat will not work.");
+    };
+    document.head.appendChild(script);
   }
 
   function setupSocketListeners() {

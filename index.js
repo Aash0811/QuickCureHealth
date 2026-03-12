@@ -34,9 +34,16 @@ const mate = require("ejs-mate");
 app.engine("ejs", mate);
 
 const mongoose = require("mongoose");
-app.listen(8080,()=>{
-  console.log("app is listening");
-})
+
+// Start the HTTP server that socket.io is attached to. Previously `app.listen()`
+// was used here which created a separate server instance, leaving the `http`
+// object bound to socket.io unused. As a result the client script at
+// `/socket.io/socket.io.js` would 404 and the page kept retrying until timing
+// out. Using `http.listen()` ensures Express and socket.io share the same
+// server instance.
+http.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
 
 const User = require("./models/user.js");
 
