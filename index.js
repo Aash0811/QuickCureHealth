@@ -642,68 +642,13 @@ app.get("/address",(req,res)=>{
 
 let otpStore = {}; 
 app.post('/send-otp', async (req, res) => {
-  try {
     const { username, password, email } = req.body;
     const user = await User.findOne({ email });
     if (user) return res.send('User already exists');
-
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    otpStore[email] = { code: otp, expiresAt: Date.now() + 5 * 60 * 1000 };
-
-    req.session.signupData = { username, password, email };
-
-    await sendEmail(email, 'Your OTP Code', `
-      <p>Your OTP is: <strong>${otp}</strong></p>
-      <p>It is valid for 5 minutes.</p>
-    `);
-    res.render("otp-verify.ejs", { email });
-  } catch (error) {
-    console.error('OTP send error:', error);
-    res.status(500).send('Failed to send OTP. Please try again.');
-  }
+    return res.redirect("/");
 });
 
-app.post('/verify-otp', async (req, res) => {
-  try {
-    const { email, otp } = req.body;
 
-    if (!otpStore[email]) {
-      return res.status(400).send('OTP expired or not sent. Please request a new OTP.');
-    }
-
-    if (Date.now() > otpStore[email].expiresAt) {
-      delete otpStore[email];
-      return res.status(400).send('OTP expired. Please request a new OTP.');
-    }
-
-    if (otpStore[email].code.toString() !== otp.toString()) {
-      return res.status(400).send('Invalid OTP');
-    }
-
-    delete otpStore[email];
-
-    const signupData = req.session.signupData;
-    if (!signupData || signupData.email !== email) {
-      return res.status(400).send('Signup session expired or invalid');
-    }
-
-    const user = await User.register(
-      new User({ username: signupData.username, email: signupData.email }),
-      signupData.password
-    );
-    req.login(user, (err) => {
-      if (err) {
-        console.error('Login error:', err);
-        return res.status(500).send('Login error after registration');
-      }
-      delete req.session.signupData;
-      return res.redirect("/");
-    });
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    res.status(500).send('OTP verification failed. Please try again.');
-  }
-});
 
 app.get("/login", (req, res) => res.render("dual.ejs"));
 
