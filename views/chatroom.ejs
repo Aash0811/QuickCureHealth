@@ -181,10 +181,17 @@
   const userModel = "<%= userModel %>";
   const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-  // Wait for socket.io to load
+  // Wait for socket.io to load with retry limit
+  let retryCount = 0;
+  const maxRetries = 50; // 50 retries = ~5 seconds with 100ms intervals
+  
   function initializeSocket() {
     if (typeof io === 'undefined') {
-      console.warn("socket.io not loaded yet, retrying...");
+      retryCount++;
+      if (retryCount >= maxRetries) {
+        console.error("FATAL: socket.io failed to load after " + maxRetries + " retries. Check if /socket.io/socket.io.js is accessible.");
+        return; // Stop retrying
+      }
       setTimeout(initializeSocket, 100);
       return;
     }
