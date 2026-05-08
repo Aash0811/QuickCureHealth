@@ -35,7 +35,7 @@ async function aiModel(query) {
         .join("")}
     `;
 
-    return structuredResponse;
+    return structuredResponse ;
   } catch (error) {
     console.error("AI provider error:", error);
     if (error.response) {
