@@ -1,25 +1,32 @@
-import OpenAI from "openai";
-import "dotenv/config";
+require("dotenv").config();
+const OpenAI = require("openai");
+
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const NVIDIA_BASE_URL = process.env.OPENAI_BASE_URL || "https://integrate.api.nvidia.com/v1";
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://integrate.api.nvidia.com/v1",
+  apiKey: OPENAI_API_KEY,
+  baseURL: NVIDIA_BASE_URL,
 });
-// this is aimodel useing meta/llama
-export const aiModel = async (query) => {
-try {
-    const completion = await openai.chat.completions.create({
-      model: "meta/llama-3.3-70b-instruct",
-      messages: [{ role: "user", content: query }],
-      temperature: 0.2,
-      top_p: 0.7,
-      max_tokens: 2048,
-      stream: false,
-    });
 
-  
-    const result = completion.choices[0]?.message?.content || "No response from the API.";
+async function callNvidia(query) {
+  const completion = await openai.chat.completions.create({
+    model: "meta/llama-3.3-70b-instruct",
+    messages: [{ role: "user", content: query }],
+    temperature: 0.2,
+    top_p: 0.7,
+    max_tokens: 2048,
+    stream: false,
+  });
 
-   
+  return completion.choices[0]?.message?.content || "No response from the API.";
+}
+
+async function aiModel(query) {
+  try {
+    const result = await callNvidia(query);
+
     const structuredResponse = `
       <h2>Analysis Result</h2>
       ${result
@@ -30,7 +37,13 @@ try {
 
     return structuredResponse;
   } catch (error) {
-    console.error("Error:", error.message || error);
+    console.error("AI provider error:", error);
+    if (error.response) {
+      console.error("AI provider response status:", error.response.status);
+      console.error("AI provider response body:", error.response.data || error.response.body || "<no body>");
+    }
     return "An error occurred while processing your request. Please try again later.";
   }
-};
+}
+
+module.exports = { aiModel };

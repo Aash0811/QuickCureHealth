@@ -1,4 +1,3 @@
-
 {
   "engines": {
     "node": ">=22"
@@ -12,7 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Perfect 👍 — here’s your updated **README.md** content with the **deployment link** included instead of setup instructions:",
   "dependencies": {
     "@stripe/stripe-js": "^7.4.0",
     "axios": "^1.8.4",
@@ -39,5 +38,14 @@
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aash0811/QuickCureHealth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aash0811/QuickCureHealth/issues"
+  },
+  "homepage": "https://github.com/Aash0811/QuickCureHealth#readme"
 }

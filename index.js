@@ -4,8 +4,8 @@ const ejs = require("ejs");
 const port = 8080;
 const path = require("path");
 const methodOverride = require("method-override");
-const aiModel = require("./aiModel.js"); 
-const session=require("express-session");
+const aiModel = require("./aiModel.js");
+const session = require("express-session");
 const passport = require("passport");
 const dotenv = require("dotenv");
 const flash = require('connect-flash');
@@ -61,25 +61,23 @@ app.use((req, res, next) => {
 
 async function init() {
   try {
-    await mongoose.connect(`mongodb+srv://quickcurehealth:${process.env.DBPASS}@cluster0.iqv2slt.mongodb.net/?appName=Cluster0`, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(`mongodb://localhost:27017/main`);
     console.log("Database connected successfully");
   } catch (error) {
     console.error("Database connection failed:", error);
+    console.error("Check MongoDB Atlas network access / IP whitelist and verify your connection string.");
   }
 }
 init();
-const Drug=require("./models/druglist.js");
+const Drug = require("./models/druglist.js");
 const ChatRequest = require("./models/chat.js");
 const ChatMessage = require("./models/chatMessage");
 
 const Doctor = require("./models/doctor.js");
 passport.use("doctor-local", Doctor.createStrategy());
 passport.use("user-local", User.createStrategy());
-passport.serializeUser(function(user, done) {
-  
+passport.serializeUser(function (user, done) {
+
   const type = user && user.specialization !== undefined ? "doctor" : "user";
   done(null, { id: user._id, type });
 });
@@ -100,7 +98,7 @@ app.post("/doctor-login", (req, res, next) => {
   })(req, res, next);
 });
 
-passport.deserializeUser(async function(obj, done) {
+passport.deserializeUser(async function (obj, done) {
   try {
     if (obj.type === "doctor") {
       const doctor = await Doctor.findById(obj.id);
@@ -119,33 +117,33 @@ app.get("/", (req, res) => {
 });
 
 app.get("/prediction", (req, res) => {
-   res.render("idx1.ejs");
+  res.render("idx1.ejs");
 });
 
-app.get("/list/:id", (req, res,next) => {
-  let {id}=req.params;
-  Doctor.find({city:id}).then((data) => {
+app.get("/list/:id", (req, res, next) => {
+  let { id } = req.params;
+  Doctor.find({ city: id }).then((data) => {
     res.render("fields.ejs", { data: data, city: id, spec: "", sort: null });
   })
-  .catch((err)=>{
-    next(err);
-  })
-  });
+    .catch((err) => {
+      next(err);
+    })
+});
 
-  app.get("/list/:id1/:id2", (req, res) => {
-    let {id1,id2}=req.params;
-    Doctor.find({ specialization: id2, city: id1 }).then((results) => {
-      res.render("fields.ejs", { data: results, city: id1, spec: id2, sort: null });
-    });
+app.get("/list/:id1/:id2", (req, res) => {
+  let { id1, id2 } = req.params;
+  Doctor.find({ specialization: id2, city: id1 }).then((results) => {
+    res.render("fields.ejs", { data: results, city: id1, spec: id2, sort: null });
   });
+});
 
-  app.post("/list/:id1/sort", (req, res) => {
-    let {id1}=req.params;
-    let {doctor,sort}=req.body;
-   Doctor.find({ specialization: doctor, city: id1 }).sort({ [sort]: -1 }).then((results) => {
-      res.render("fields.ejs", { data: results, city: id1, spec: doctor, sort: sort });
-    });
+app.post("/list/:id1/sort", (req, res) => {
+  let { id1 } = req.params;
+  let { doctor, sort } = req.body;
+  Doctor.find({ specialization: doctor, city: id1 }).sort({ [sort]: -1 }).then((results) => {
+    res.render("fields.ejs", { data: results, city: id1, spec: doctor, sort: sort });
   });
+});
 
 
 app.get("/patient-dashboard", async (req, res) => {
@@ -190,12 +188,12 @@ app.post("/request-appoint", async (req, res) => {
 });
 app.post("/accept-appointment", async (req, res) => {
   try {
-    const { requestId } = req.body; 
+    const { requestId } = req.body;
     const chatRequest = await ChatRequest.findByIdAndUpdate(
       requestId,
       { status: "accepted" },
       { new: true }
-    ).populate("patient doctor"); 
+    ).populate("patient doctor");
 
     if (!chatRequest) {
       req.flash("error", "Appointment not found.");
@@ -348,42 +346,42 @@ io.on("connection", (socket) => {
     });
   });
 
- socket.on("file-share", async ({ chatId, fileName, fileData, sender, senderModel }) => {
-  if (!chatId || !fileName || !fileData || !sender || !senderModel) {
-    console.error("Missing data in file-share");
-    return;
-  }
+  socket.on("file-share", async ({ chatId, fileName, fileData, sender, senderModel }) => {
+    if (!chatId || !fileName || !fileData || !sender || !senderModel) {
+      console.error("Missing data in file-share");
+      return;
+    }
 
-  const timestamp = new Date().toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
+    const timestamp = new Date().toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
 
-  const newMsg = new ChatMessage({
-    chatRequest: chatId,
-    senderName: sender,
-    senderModel,
-    file: {
+    const newMsg = new ChatMessage({
+      chatRequest: chatId,
+      senderName: sender,
+      senderModel,
+      file: {
+        fileName,
+        fileData,
+      },
+      timestamp,
+    });
+
+    await newMsg.save();
+
+    io.to(chatId).emit("file-share", {
       fileName,
       fileData,
-    },
-    timestamp,
+      sender,
+      senderModel,
+      timestamp,
+    });
   });
-
-  await newMsg.save();
-
-  io.to(chatId).emit("file-share", {
-    fileName,
-    fileData,
-    sender,
-    senderModel,
-    timestamp,
-  });
-});
   socket.on("start-call", (roomId) => {
     socket.to(roomId).emit("user-joined");
   });
@@ -423,7 +421,7 @@ app.post("/book-test", async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) {
       res.send("<h1>user not logged in </h1>");
-      return; 
+      return;
     }
     const booking = new TestBooking({
       test: test._id,
@@ -448,9 +446,9 @@ app.post("/dummy-pay", async (req, res) => {
       bookingId,
       { paymentStatus: "paid" },
       { new: true }
-    ).populate("user test"); 
+    ).populate("user test");
 
-console.log(booking);
+    console.log(booking);
     if (!booking) {
       return res.status(404).send("Booking not found");
     }
@@ -480,7 +478,7 @@ app.post("/create-order", async (req, res) => {
   const { amount } = req.body;
 
   const options = {
-    amount: amount * 100, 
+    amount: amount * 100,
     currency: "INR",
     receipt: "receipt_order_" + uuidv4(),
   };
@@ -518,14 +516,14 @@ app.post("/sym", async (req, res) => {
     res.status(500).send("An error occurred while processing your request. Please try again later.");
   }
 });
-app.get("/drug",(req,res)=>{
-  let {name}=req.query;
-    Drug.findOne({name:name})
-    .then((data)=>{
-      res.render("DrugShow.ejs",{data:data});
+app.get("/drug", (req, res) => {
+  let { name } = req.query;
+  Drug.findOne({ name: name })
+    .then((data) => {
+      res.render("DrugShow.ejs", { data: data });
     })
-    .catch((err)=>{
-res.send("no data found");
+    .catch((err) => {
+      res.send("no data found");
     })
 })
 app.post("/cart/remove/:drugId", async (req, res) => {
@@ -565,10 +563,10 @@ app.post("/drug/:id", async (req, res) => {
   try {
     await User.findByIdAndUpdate(
       req.user._id,
-      { $addToSet: { cart: id } }, 
+      { $addToSet: { cart: id } },
       { new: true }
     );
-    res.redirect("/drugs"); 
+    res.redirect("/drugs");
   } catch (err) {
     console.error("Error adding to cart:", err);
     res.status(500).send("Error adding drug to cart.");
@@ -579,10 +577,10 @@ app.get("/drugs", async (req, res) => {
   Drug.find({}).then((data) => {
     res.render("idx4.ejs", { drugs: data });
   })
-  .catch((err) => {
-    console.error("Error fetching drugs:", err);
-    res.status(500).send("An error occurred while fetching the drug list.");
-  });
+    .catch((err) => {
+      console.error("Error fetching drugs:", err);
+      res.status(500).send("An error occurred while fetching the drug list.");
+    });
 });
 app.post("/address", async (req, res) => {
   const { firstName, lastName, number, address, price } = req.body;
@@ -594,17 +592,17 @@ app.post("/address", async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('cart');
     const email = user.email;
-  
+
     let cartHtml = "<ul>";
     user.cart.forEach(drug => {
       cartHtml += `<li>${drug.name} - ${drug.medSelling}</li>`;
-        Drug.findByIdAndUpdate(drug._id,{$inc:{stock:-1}},{new:true}).then(()=>{
-          console.log(`${drug.name} - ${drug.medSelling}`);
-        })
-        .catch((err)=>{
+      Drug.findByIdAndUpdate(drug._id, { $inc: { stock: -1 } }, { new: true }).then(() => {
+        console.log(`${drug.name} - ${drug.medSelling}`);
+      })
+        .catch((err) => {
           console.log("error");
         })
-      
+
     });
     cartHtml += "</ul>";
 
@@ -623,10 +621,10 @@ app.post("/address", async (req, res) => {
     `;
 
     await sendEmail(email, "Your Order is Placed - QuickCure Health", mailContent);
-  
-user.orders = user.orders.concat(user.cart.map(drug => drug._id));
-user.cart = [];
-await user.save();
+
+    user.orders = user.orders.concat(user.cart.map(drug => drug._id));
+    user.cart = [];
+    await user.save();
 
     res.send("<h1>Order placed successfully! A confirmation email has been sent to your email address.<a href='/'><button></button></a></h1>");
   } catch (err) {
@@ -634,42 +632,42 @@ await user.save();
     res.status(500).send("Error placing order.");
   }
 });
-app.get("/address",(req,res)=>{
-  let {price}=req.query;
-  res.render("address.ejs",{price, WHEATHER_API : process.env.WHEATHER_API})
+app.get("/address", (req, res) => {
+  let { price } = req.query;
+  res.render("address.ejs", { price, WHEATHER_API: process.env.WHEATHER_API })
 })
 
 app.post('/send-otp', async (req, res) => {
-    try {
-      const { username, password, email } = req.body;
- 
-      if (!username || !password || !email) {
-        return res.status(400).send('All fields (username, password, email) are required');
-      }
+  try {
+    const { username, password, email } = req.body;
 
-      const user1 = await User.findOne({ email });
-      if (user1) {
-        return res.status(400).send('User already exists');
-      }
-
-      const user = await User.register(
-        new User({ username: username, email: email }),
-        password
-      );
-
-
-      req.login(user, (err) => {
-        if (err) {
-          console.error('Login error:', err);
-          return res.status(500).send('Login error after registration');
-        }
-        delete req.session.signupData;
-        return res.redirect("/");
-      });
-    } catch (err) {
-      console.error('Signup error:', err);
-      res.status(500).send(`Signup error: ${err.message}`);
+    if (!username || !password || !email) {
+      return res.status(400).send('All fields (username, password, email) are required');
     }
+
+    const user1 = await User.findOne({ email });
+    if (user1) {
+      return res.status(400).send('User already exists');
+    }
+
+    const user = await User.register(
+      new User({ username: username, email: email }),
+      password
+    );
+
+
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).send('Login error after registration');
+      }
+      delete req.session.signupData;
+      return res.redirect("/");
+    });
+  } catch (err) {
+    console.error('Signup error:', err);
+    res.status(500).send(`Signup error: ${err.message}`);
+  }
 });
 
 
@@ -720,7 +718,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.get("/signout", (req, res) => {
-  req.logout(function(err) {
+  req.logout(function (err) {
     if (err) {
       console.error("Logout error:", err);
       return res.status(500).send("Logout failed.");
